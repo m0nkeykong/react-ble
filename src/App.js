@@ -19,53 +19,60 @@ class App extends Component {
     
     // functions
     this.receive = this.receive.bind(this);
-    this.logToTerminal = this.logToTerminal.bind(this);
+    // this.logToTerminal = this.logToTerminal.bind(this);
     this._log = this._log.bind(this);
-    this.scrollElement = this.scrollElement.bind(this);
+    // this.scrollElement = this.scrollElement.bind(this);
     this.send = this.send.bind(this);
     this.connectButton = this.connectButton.bind(this);
     this.disconnectButton = this.disconnectButton.bind(this);
     this.submited = this.submited.bind(this);
-    this.scrolled = this.scrolled.bind(this);
+    // this.scrolled = this.scrolled.bind(this);
+    this.sendData = this.sendData.bind(this);
 
     // Helpers.
     this.defaultDeviceName = 'Terminal';
-    this.terminalAutoScrollingLimit = 0;
-    this.isTerminalAutoScrolling = true;
+    // this.terminalAutoScrollingLimit = 0;
+    // this.isTerminalAutoScrolling = true;
 
     
     // Switch terminal auto scrolling if it scrolls out of bottom.
   }
 
-  scrolled = () => {
-    const scrollTopOffset = this.refs.terminalContainer.scrollHeight -
-        this.refs.terminalContainer.offsetHeight - this.terminalAutoScrollingLimit;
+  // scrolled = () => {
+  //   const scrollTopOffset = this.refs.terminalContainer.scrollHeight -
+  //       this.refs.terminalContainer.offsetHeight - this.terminalAutoScrollingLimit;
 
-      this.isTerminalAutoScrolling = (scrollTopOffset < this.refs.terminalContainer.scrollTop);
-  };
+  //     this.isTerminalAutoScrolling = (scrollTopOffset < this.refs.terminalContainer.scrollTop);
+  // };
   
-  submited = (event) => {
-    //event.preventDefault();
+  sendData = () => {
+    console.log("going to submited");
+    this.submited();
+  }
+
+
+  submited = () => {
+    console.log(this.refs.inputField.value);
     this.send(this.refs.inputField.value);
     this.refs.inputField.value = '';
     this.refs.inputField.focus();
   }
 
-  scrollElement = (element) => {
-    const scrollTop = element.scrollHeight - element.offsetHeight;
+  // scrollElement = (element) => {
+  //   const scrollTop = element.scrollHeight - element.offsetHeight;
 
-    if (scrollTop > 0) {
-      element.scrollTop = scrollTop;
-    }
-  };
+  //   if (scrollTop > 0) {
+  //     element.scrollTop = scrollTop;
+  //   }
+  // };
 
-  logToTerminal = (message, type = '') => {
-    this.refs.terminalContainer.insertAdjacentHTML('beforeend', `<div${type && ` class="${type}"`}>${message}</div>`);
+  // logToTerminal = (message, type = '') => {
+  //   this.refs.terminalContainer.insertAdjacentHTML('beforeend', `<div${type && ` class="${type}"`}>${message}</div>`);
 
-    if (this.isTerminalAutoScrolling) {
-      this.scrollElement(this.refs.terminalContainer);
-    }
-  };
+  //   if (this.isTerminalAutoScrolling) {
+  //     this.scrollElement(this.refs.terminalContainer);
+  //   }
+  // };
 
 // Obtain configured instance.
 
@@ -73,16 +80,17 @@ class App extends Component {
   // Override `receive` method to log incoming data to the terminal
     receive = () => {
       this.terminal.receive = (data) => {
-        this.logToTerminal(data, 'in');
+        //this.logToTerminal(data, 'in');
+        this.terminal._log(data);
       };
     }
 
   // Override default log method to output messages to the terminal and console.
     _log = () => {
-      this.terminal._log = function (...messages) {
+      this.terminal._log = (...messages) => {
         // We can't use `super._log()` here.
         messages.forEach((message) => {
-          this.logToTerminal(message);
+          //this.logToTerminal(message);
           console.log(message); // eslint-disable-line no-console
         });
       }
@@ -91,8 +99,8 @@ class App extends Component {
   // Implement own send function to log outcoming data to the terminal.
     send = (data) => {
       this.terminal.send(data).
-        then(() => this.logToTerminal(data, 'out')).
-        catch((error) => this.logToTerminal(error));
+        then(() => this.terminal._log(data)).
+        catch((error) => this.terminal._log(error));
     };
 
   // Bind event listeners to the UI elements.
@@ -105,14 +113,14 @@ class App extends Component {
 
     disconnectButton = () => {
       this.terminal.disconnect();
-      //this.refs.deviceNameLabel.textContent = this.defaultDeviceName;
+      // this.refs.deviceNameLabel.textContent = this.defaultDeviceName;
     };
 
     componentDidMount() {
-      this.refs.sendForm.addEventListener('submit', this.submited);
-      this.refs.terminalContainer.addEventListener('scroll', this.scrolled);
+      // this.refs.sendForm.addEventListener('submit', this.submited);
+      // this.refs.terminalContainer.addEventListener('scroll', this.scrolled);
       
-      this.terminalAutoScrollingLimit = this.refs.terminalContainer.offsetHeight / 2;
+      // this.terminalAutoScrollingLimit = this.refs.terminalContainer.offsetHeight / 2;
     }
 
 
@@ -133,12 +141,10 @@ class App extends Component {
           </div>
         </div>
         <div id="terminal" ref="terminalContainer" className="terminal"></div>
-        <form id="send-form" ref="sendForm" className="send-form">
-          <input id="input" ref="inputField" type="text" aria-label="Input" autoComplete="off" placeholder="Type something to send..."/>
-            <button type="submit" aria-label="Send">
-              <i className="material-icons">send</i>
-            </button>
-        </form>
+          <input id="input" ref="inputField" type="text" aria-label="Input" autoComplete="off" placeholder="Type something to send..." />
+          <button onClick={this.sendData} aria-label="Send">
+            <i className="material-icons">send</i>
+          </button>
       </div>
     );
   }

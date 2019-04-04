@@ -17,7 +17,7 @@ class App extends Component {
     
     this.terminal = new BluetoothTerminal();
     
-    // functions
+    // functions ---
     this.receive = this.receive.bind(this);
     // this.logToTerminal = this.logToTerminal.bind(this);
     this._log = this._log.bind(this);
